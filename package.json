@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "Costlocker integration for Claude Desktop via Model Context Protocol (MCP)",
   "main": "dist/index.js",
+  "bin": {
+    "costlocker-mcp": "dist/index.js"
+  },
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jan-sevcik-snadnee/costlocker-mcp"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
@@ -36,6 +43,7 @@
     "dist/**/*",
     "src/**/*",
     "package.json",
-    "tsconfig.json"
+    "tsconfig.json",
+    "README.md"
   ]
 }
