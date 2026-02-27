@@ -12,12 +12,12 @@ import {
 import { CostlockerClient } from './costlocker/client.js';
 
 // --- Env validation ---
-const COSTLOCKER_APP_NAME = process.env.COSTLOCKER_APP_NAME;
+const COSTLOCKER_APP_NAME = process.env.COSTLOCKER_APP_NAME || 'costlocker-mcp';
 const COSTLOCKER_API_TOKEN = process.env.COSTLOCKER_API_TOKEN;
 const COSTLOCKER_HOST = process.env.COSTLOCKER_HOST || 'https://rest.costlocker.com';
 
-if (!COSTLOCKER_APP_NAME || !COSTLOCKER_API_TOKEN) {
-  process.stderr.write('Missing COSTLOCKER_APP_NAME or COSTLOCKER_API_TOKEN environment variables.\n');
+if (!COSTLOCKER_API_TOKEN) {
+  process.stderr.write('Missing COSTLOCKER_API_TOKEN environment variable.\n');
   process.exit(1);
 }
 

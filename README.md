@@ -11,9 +11,7 @@ MCP server for [Costlocker](https://costlocker.com) — your project management 
 1. Log in to [Costlocker](https://new.costlocker.com)
 2. Click your **name** in the top-right corner and select **Settings**
 3. Go to the **API** tab (or go directly to [new.costlocker.com/settings/api](https://new.costlocker.com/settings/api))
-4. Create a new token — you'll get an **App name** and an **API token**
-
-Keep both values, you'll need them in the next step.
+4. Create a new token — use **`costlocker-mcp`** as the App name and copy the generated **API token**
 
 ### 2. Configure your MCP client
 
@@ -29,7 +27,6 @@ Add the `costlocker` server to your MCP client configuration. Example for deskto
       "command": "npx",
       "args": ["-y", "costlocker-mcp"],
       "env": {
-        "COSTLOCKER_APP_NAME": "your-app-name",
         "COSTLOCKER_API_TOKEN": "your-api-token"
       }
     }
@@ -37,7 +34,7 @@ Add the `costlocker` server to your MCP client configuration. Example for deskto
 }
 ```
 
-Replace `your-app-name` and `your-api-token` with the values from step 1.
+Replace `your-api-token` with the token from step 1.
 
 ### 3. Restart your MCP client
 
@@ -74,8 +71,8 @@ All tool names are prefixed with `costlocker_` (e.g. `costlocker_list_projects`)
 
 | Environment variable | Required | Description |
 |---|---|---|
-| `COSTLOCKER_APP_NAME` | Yes | App name from Costlocker API settings |
 | `COSTLOCKER_API_TOKEN` | Yes | Personal access token from Costlocker API settings |
+| `COSTLOCKER_APP_NAME` | No | App name used when creating the token (default: `costlocker-mcp`) |
 | `COSTLOCKER_HOST` | No | API host (default: `https://rest.costlocker.com`) |
 
 ## License
