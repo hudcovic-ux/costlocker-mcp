@@ -1,7 +1,7 @@
 {
   "name": "costlocker-mcp",
-  "version": "1.0.0",
-  "description": "Costlocker integration for Claude Desktop via Model Context Protocol (MCP)",
+  "version": "1.0.1",
+  "description": "Costlocker integration via Model Context Protocol (MCP) for AI-powered project management",
   "main": "dist/index.js",
   "bin": {
     "costlocker-mcp": "dist/index.js"
@@ -22,8 +22,7 @@
     "mcp",
     "model-context-protocol",
     "costlocker",
-    "claude",
-    "claude-desktop",
+    "ai",
     "time-tracking",
     "project-management"
   ],

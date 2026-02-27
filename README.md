@@ -1,6 +1,6 @@
 # costlocker-mcp
 
-MCP server that connects [Claude](https://claude.ai) to [Costlocker](https://costlocker.com) — your project management and time tracking tool. Ask Claude about your projects, budgets, timesheets, and more. Directly from Claude Desktop.
+MCP server for [Costlocker](https://costlocker.com) — your project management and time tracking tool. Connect your AI assistant to Costlocker and work with projects, budgets, timesheets, and more through natural language.
 
 ## Quick start
 
@@ -15,14 +15,12 @@ MCP server that connects [Claude](https://claude.ai) to [Costlocker](https://cos
 
 Keep both values, you'll need them in the next step.
 
-### 2. Add to Claude Desktop
+### 2. Configure your MCP client
 
-Open your Claude Desktop configuration file:
+Add the `costlocker` server to your MCP client configuration. Example for desktop apps:
 
-- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-Add the `costlocker` server:
+- **macOS config:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows config:** `%APPDATA%\Claude\claude_desktop_config.json`
 
 ```json
 {
@@ -41,9 +39,9 @@ Add the `costlocker` server:
 
 Replace `your-app-name` and `your-api-token` with the values from step 1.
 
-### 3. Restart Claude Desktop
+### 3. Restart your MCP client
 
-That's it. Claude now has access to your Costlocker data. Try asking:
+That's it. Your AI assistant now has access to your Costlocker data. Try asking:
 
 - *"Show me all running projects"*
 - *"How many hours did I log this week?"*
@@ -66,7 +64,7 @@ All tool names are prefixed with `costlocker_` (e.g. `costlocker_list_projects`)
 
 ## Security
 
-- **Write operations** (`create_project`, `update_project`, `log_time`) require user confirmation — Claude will always ask before making changes
+- **Write operations** (`create_project`, `update_project`, `log_time`) require user confirmation — the AI will always ask before making changes
 - **Input validation** on all write operations (Zod schemas)
 - **Access control** is handled by your personal API token — you only see data your Costlocker role allows
 - **Credential check** on startup via `/me` endpoint — invalid tokens fail immediately
