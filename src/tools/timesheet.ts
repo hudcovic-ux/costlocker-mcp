@@ -24,6 +24,10 @@ export const logTimeTool: Tool = {
         type: 'number',
         description: 'Activity ID within the project',
       },
+      task_id: {
+        type: 'number',
+        description: 'Task ID within the activity (optional, but required for correct assignment)',
+      },
       person_id: {
         type: 'number',
         description: 'Person ID (if not provided, logs for current user)',
@@ -120,6 +124,7 @@ export const getAssignmentsTool: Tool = {
 const logTimeSchema = z.object({
   project_id: z.number().int().positive('Project ID must be a positive integer'),
   activity_id: z.number().int().positive('Activity ID must be a positive integer'),
+  task_id: z.number().int().positive('Task ID must be a positive integer').optional(),
   person_id: z.number().int().positive('Person ID must be a positive integer').optional(),
   hours: z.number().positive('Hours must be greater than 0').max(24, 'Hours cannot exceed 24'),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD format').optional(),
@@ -133,13 +138,17 @@ export async function handleLogTime(client: CostlockerClient, args: Record<strin
     const parsed = logTimeSchema.parse(args);
     const durationSeconds = Math.round(parsed.hours * 3600);
 
-    const entry: Record<string, unknown> = {
+    const assignment: Record<string, unknown> = {
       project_id: parsed.project_id,
       activity_id: parsed.activity_id,
+    };
+    if (parsed.person_id) assignment.person_id = parsed.person_id;
+    if (parsed.task_id) assignment.task_id = parsed.task_id;
+    const entry: Record<string, unknown> = {
+      assignment,
       duration: durationSeconds,
       date: parsed.date || new Date().toISOString().split('T')[0],
     };
-    if (parsed.person_id) entry.person_id = parsed.person_id;
     if (parsed.description) entry.description = parsed.description;
 
     const data = await client.restPost('/timeentries/', [entry]);
@@ -147,7 +156,7 @@ export async function handleLogTime(client: CostlockerClient, args: Record<strin
       content: [{
         type: 'text' as const,
         text: JSON.stringify({
-          summary: `Logged ${parsed.hours}h on project ${parsed.project_id}, activity ${parsed.activity_id}`,
+          summary: `Logged ${parsed.hours}h on project ${parsed.project_id}, activity ${parsed.activity_id}${parsed.task_id ? `, task ${parsed.task_id}` : ""}`,
           result: data,
         }, null, 2),
       }],
