@@ -44,7 +44,9 @@ try {
 // --- Tool imports ---
 import {
   listProjectsTool, getProjectTool, searchProjectsTool, createProjectTool, updateProjectTool,
+  upsertTasksTool, deleteTaskTool,
   handleListProjects, handleGetProject, handleSearchProjects, handleCreateProject, handleUpdateProject,
+  handleUpsertTasks, handleDeleteTask,
 } from './tools/projects.js';
 
 import {
@@ -96,6 +98,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     searchProjectsTool,
     createProjectTool,
     updateProjectTool,
+    upsertTasksTool,
+    deleteTaskTool,
     // Finance
     getProjectBudgetTool,
     getProjectBillingTool,
@@ -129,6 +133,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     case 'costlocker_search_projects': return handleSearchProjects(client, a);
     case 'costlocker_create_project': return handleCreateProject(client, a);
     case 'costlocker_update_project': return handleUpdateProject(client, a);
+    case 'costlocker_upsert_tasks': return handleUpsertTasks(client, a);
+    case 'costlocker_delete_task': return handleDeleteTask(client, a);
     // Finance
     case 'costlocker_get_project_budget': return handleGetProjectBudget(client, a);
     case 'costlocker_get_project_billing': return handleGetProjectBilling(client, a);

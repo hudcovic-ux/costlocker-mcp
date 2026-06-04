@@ -139,6 +139,90 @@ export const updateProjectTool: Tool = {
   },
 };
 
+export const upsertTasksTool: Tool = {
+  name: 'costlocker_upsert_tasks',
+  description: '[WRITE OPERATION] Create or update tasks in a project activity, including setting estimated hours (odhadovane hodiny). To create a new task omit task_id. To update an existing task include task_id. All tasks in the array are written in a single API call.',
+  annotations: {
+    title: 'Upsert Tasks',
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
+  inputSchema: {
+    type: 'object',
+    properties: {
+      project_id: {
+        type: 'number',
+        description: 'The project ID',
+      },
+      activity_id: {
+        type: 'number',
+        description: 'The activity ID under which tasks will be created/updated',
+      },
+      person_id: {
+        type: 'number',
+        description: 'The person ID assigned to the tasks',
+      },
+      tasks: {
+        type: 'array',
+        description: 'List of tasks to create or update',
+        items: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'Task name',
+            },
+            budget_hours: {
+              type: 'number',
+              description: 'Estimated hours (odhadovane hodiny) for the task',
+            },
+            task_id: {
+              type: 'number',
+              description: 'Existing task ID for update. Omit to create a new task.',
+            },
+          },
+          required: ['name', 'budget_hours'],
+        },
+      },
+    },
+    required: ['project_id', 'activity_id', 'person_id', 'tasks'],
+  },
+};
+
+export const deleteTaskTool: Tool = {
+  name: 'costlocker_delete_task',
+  description: '[WRITE OPERATION] Delete a task from a project activity.',
+  annotations: {
+    title: 'Delete Task',
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
+  inputSchema: {
+    type: 'object',
+    properties: {
+      project_id: {
+        type: 'number',
+        description: 'The project ID',
+      },
+      activity_id: {
+        type: 'number',
+        description: 'The activity ID',
+      },
+      person_id: {
+        type: 'number',
+        description: 'The person ID',
+      },
+      task_id: {
+        type: 'number',
+        description: 'The task ID to delete',
+      },
+    },
+    required: ['project_id', 'activity_id', 'person_id', 'task_id'],
+  },
+};
+
 // --- Validation schemas ---
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD format');
@@ -159,6 +243,26 @@ const updateProjectSchema = z.object({
   date_end: dateSchema.optional(),
   state: z.enum(['running', 'finished', 'idle']).optional(),
   tags: z.array(z.string()).optional(),
+});
+
+const upsertTaskSchema = z.object({
+  name: z.string().min(1),
+  budget_hours: z.number().nonnegative(),
+  task_id: z.number().int().positive().optional(),
+});
+
+const upsertTasksSchema = z.object({
+  project_id: z.number().int().positive(),
+  activity_id: z.number().int().positive(),
+  person_id: z.number().int().positive(),
+  tasks: z.array(upsertTaskSchema).min(1),
+});
+
+const deleteTaskSchema = z.object({
+  project_id: z.number().int().positive(),
+  activity_id: z.number().int().positive(),
+  person_id: z.number().int().positive(),
+  task_id: z.number().int().positive(),
 });
 
 // --- Handlers ---
@@ -299,6 +403,66 @@ export async function handleUpdateProject(client: CostlockerClient, args: Record
     };
   } catch (error) {
     return errorResult('updating project', error);
+  }
+}
+
+export async function handleUpsertTasks(client: CostlockerClient, args: Record<string, unknown>) {
+  try {
+    const parsed = upsertTasksSchema.parse(args);
+    const items = parsed.tasks.map(t => {
+      const item: Record<string, string> = {
+        type: 'task',
+        activity_id: String(parsed.activity_id),
+        person_id: String(parsed.person_id),
+      };
+      if (t.task_id) item.task_id = String(t.task_id);
+      return {
+        item,
+        hours: { budget: t.budget_hours },
+        task: { name: t.name },
+      };
+    });
+
+    const data = await client.restPost('/projects/', [{ id: parsed.project_id, items }]);
+    return {
+      content: [{
+        type: 'text' as const,
+        text: JSON.stringify({
+          summary: `Upserted ${parsed.tasks.length} task(s) in project ${parsed.project_id}`,
+          result: data,
+        }, null, 2),
+      }],
+    };
+  } catch (error) {
+    return errorResult('upserting tasks', error);
+  }
+}
+
+export async function handleDeleteTask(client: CostlockerClient, args: Record<string, unknown>) {
+  try {
+    const parsed = deleteTaskSchema.parse(args);
+    const items = [{
+      item: {
+        type: 'task',
+        activity_id: String(parsed.activity_id),
+        person_id: String(parsed.person_id),
+        task_id: String(parsed.task_id),
+      },
+      _action: 'delete',
+    }];
+
+    const data = await client.restPost('/projects/', [{ id: parsed.project_id, items }]);
+    return {
+      content: [{
+        type: 'text' as const,
+        text: JSON.stringify({
+          summary: `Deleted task ${parsed.task_id} from project ${parsed.project_id}`,
+          result: data,
+        }, null, 2),
+      }],
+    };
+  } catch (error) {
+    return errorResult('deleting task', error);
   }
 }
 
